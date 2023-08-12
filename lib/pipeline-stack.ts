@@ -44,7 +44,6 @@ export class PipelineStack extends cdk.Stack {
         ],
         primaryOutputDirectory: "cdk.out"
       }),
-      selfMutation: true
     })
     // staging
     const stagingApp = new TargetApplication(this, "staging", {env: props.stagingEnv})
