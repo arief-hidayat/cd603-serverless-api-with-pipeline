@@ -26,37 +26,7 @@ export class ServerlessApiStack extends cdk.Stack {
     });
 
     // define IAM role for lambda function
-    const lambdaRole = new iam.Role(this, 'lambda-role', {
-      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
-    })
-    // allow the following CloudWatch logs action
-    const cloudWatchPolicy = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW, 
-      resources: ['*'],
-      actions: [
-        'logs:CreateLogGroup',
-        'logs:CreateLogStream',
-        'logs:PutLogEvents',
-        'logs:DescribeLogStreams',
-      ]
-    })
-    lambdaRole.addToPolicy(cloudWatchPolicy)
-    // allow the following DynamoDB actions
-    const dynamoDbPolicy = new iam.PolicyStatement({
-      effect: iam.Effect.ALLOW, 
-      resources: [ddbTable.tableArn],
-      actions: [
-        'dynamodb:PutItem',
-        'dynamodb:GetItem',
-        'dynamodb:UpdateItem',
-        'dynamodb:DeleteItem',
-        'dynamodb:Scan',
-        'dynamodb:Query',
-        'dynamodb:ConditionCheckItem',
-      ]
-    })
-    lambdaRole.addToPolicy(dynamoDbPolicy)
-
+    const lambdaRole = this.createLambdaRoleForLoggingAndDbAccess(ddbTable.tableArn)
     // create API Gateway Lambda integrations
     const deleteDataFn = this.createServerlessApi('delete-data', lambdaRole, ddbTable.tableName)
     const getDataFn = this.createServerlessApi('get-data', lambdaRole, ddbTable.tableName)
@@ -82,6 +52,41 @@ export class ServerlessApiStack extends cdk.Stack {
       value: `${api.url}${props.restResourceName}`,
       exportName: `${props.stageName}-apiEndpoint`
     })
+  }
+
+  // define IAM role for lambda function
+  createLambdaRoleForLoggingAndDbAccess(ddbTableArn: string): iam.Role {
+    const lambdaRole = new iam.Role(this, 'lambda-role', {
+      assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
+    })
+    // allow the following CloudWatch logs action
+    const cloudWatchPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      resources: ['*'],
+      actions: [
+        'logs:CreateLogGroup',
+        'logs:CreateLogStream',
+        'logs:PutLogEvents',
+        'logs:DescribeLogStreams',
+      ]
+    })
+    lambdaRole.addToPolicy(cloudWatchPolicy)
+    // allow the following DynamoDB actions
+    const dynamoDbPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      resources: [ddbTableArn],
+      actions: [
+        'dynamodb:PutItem',
+        'dynamodb:GetItem',
+        'dynamodb:UpdateItem',
+        'dynamodb:DeleteItem',
+        'dynamodb:Scan',
+        'dynamodb:Query',
+        'dynamodb:ConditionCheckItem',
+      ]
+    })
+    lambdaRole.addToPolicy(dynamoDbPolicy)
+    return lambdaRole
   }
 
   // create API Gateway Lambda Integration
