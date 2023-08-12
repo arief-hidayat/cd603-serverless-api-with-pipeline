@@ -39,6 +39,7 @@ export class PipelineStack extends cdk.Stack {
         input: this.createCodepipelineSrcConnection(props.git),
         commands: [
             "npm install -g aws-cdk-lib typescript",
+            "npm run build",
             `npm run cdk synth ${id}`,
         ],
         primaryOutputDirectory: "cdk.out"
