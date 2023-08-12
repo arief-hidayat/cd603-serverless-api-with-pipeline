@@ -53,7 +53,8 @@ export class PipelineStack extends cdk.Stack {
             envFromCfnOutputs: {
               ENDPOINT_URL: stagingApp.outputApiEndpoint
             },
-            commands: ["curl $ENDPOINT_URL/data"]
+            installCommands: ["yum install -y jq"],
+            commands: ["curl $ENDPOINT_URL | jq .data"]
           })
       ]
     })
