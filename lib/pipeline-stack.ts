@@ -38,8 +38,8 @@ export class PipelineStack extends cdk.Stack {
       synth: new cicd.ShellStep('synth', {
         input: this.createCodepipelineSrcConnection(props.git),
         commands: [
-            "npm install -g aws-cdk-lib",
-            `cdk synth ${id}`,
+            "npm install -g aws-cdk-lib typescript",
+            `npm run cdk synth ${id}`,
         ],
         primaryOutputDirectory: "cdk.out"
       }),
