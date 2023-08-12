@@ -1,5 +1,5 @@
 #!/bin/sh
-URL=$(cat cdk-output.json | jq -r .ClouddayIcd603Temp0Stack.myDataEndpoint)
-echo "GET ${URL}"
+URL=$(cat cdk-output.json | jq -r '."cd63-api-dev".apiEndpoint')
+echo "http GET ${URL}"
 http GET $URL
 

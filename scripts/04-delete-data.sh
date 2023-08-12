@@ -1,7 +1,7 @@
 #!/bin/sh
-URL=$(cat cdk-output.json | jq -r .ClouddayIcd603Temp0Stack.myDataEndpoint)
+URL=$(cat cdk-output.json | jq -r '."cd63-api-dev".apiEndpoint')
 # curl $URL
 ID=$(http GET $URL | jq -r ".data[-1].ID")
-echo "DELETE ${URL}/${ID}"
+echo "http DELETE ${URL}/${ID}"
 http DELETE "${URL}/${ID}"
 
