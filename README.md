@@ -4,6 +4,8 @@ This demo project borrows code from [demo-cdk](https://github.com/donnieprakoso/
 
 ## Useful commands
 
-* `cdk deploy`      deploy this stack to your default AWS account/region
-* `cdk diff`        compare deployed stack with current state
-* `cdk synth`       emits the synthesized CloudFormation template
+* `cdk deploy $STACK`      deploy this stack to your default AWS account/region
+* `cdk diff $STACK`        compare deployed stack with current state
+* `cdk synth $STACK`       emits the synthesized CloudFormation template
+
+where `STACK` can be `api-dev`, `pipeline`, or `--all`
