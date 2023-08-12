@@ -12,3 +12,5 @@ cdk.context.json
 package-lock.json
 
 cdk-output.json
+.idea/
+*.iml

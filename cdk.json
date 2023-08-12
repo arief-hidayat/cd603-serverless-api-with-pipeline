@@ -1,5 +1,5 @@
 {
-  "app": "npx ts-node --prefer-ts-exts bin/cloudday-icd603-temp0.ts",
+  "app": "npx ts-node --prefer-ts-exts bin/cd603-serverless-api-with-pipeline.ts",
   "watch": {
     "include": [
       "**"

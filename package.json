@@ -1,8 +1,8 @@
 {
-  "name": "cloudday-icd603-temp0",
+  "name": "cd603-serverless-api-with-pipeline",
   "version": "0.1.0",
   "bin": {
-    "cloudday-icd603-temp0": "bin/cloudday-icd603-temp0.js"
+    "cd603-serverless-api-with-pipeline": "bin/cd603-serverless-api-with-pipeline.js"
   },
   "scripts": {
     "build": "tsc",

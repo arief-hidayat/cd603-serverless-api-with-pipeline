@@ -5,11 +5,14 @@ import * as dynamodb from 'aws-cdk-lib/aws-dynamodb';
 import * as iam from 'aws-cdk-lib/aws-iam';
 import * as lambda from 'aws-cdk-lib/aws-lambda';
 
-interface ClouddayIcd603StackProps extends cdk.StackProps {
+interface ServerlessApiStackProps extends cdk.StackProps {
   restResourceName: string
+  stageName: string
 }
-export class ClouddayIcd603Temp0Stack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props: ClouddayIcd603StackProps) {
+export class ServerlessApiStack extends cdk.Stack {
+
+  outputApiEndpoint: cdk.CfnOutput
+  constructor(scope: Construct, id: string, props: ServerlessApiStackProps) {
     super(scope, id, props);
 
     // create DynamoDB Table
@@ -61,7 +64,10 @@ export class ClouddayIcd603Temp0Stack extends cdk.Stack {
 
     // create REST APIs
     const api = new apigateway.RestApi(this, 'api', {
-      endpointConfiguration: { types: [apigateway.EndpointType.EDGE] }
+      endpointConfiguration: { types: [apigateway.EndpointType.EDGE] },
+      deployOptions: {
+        stageName: props.stageName,
+      }
     })
     const restData = api.root.addResource(props.restResourceName)
     restData.addMethod('POST', saveDataFn)
@@ -75,9 +81,9 @@ export class ClouddayIcd603Temp0Stack extends cdk.Stack {
       value: ddbTable.tableName,
       exportName: 'ddbTable'
     })
-    new cdk.CfnOutput(this, 'myDataEndpoint', {
+    this.outputApiEndpoint = new cdk.CfnOutput(this, 'apiEndpoint', {
       value: `${api.url}${props.restResourceName}`,
-      exportName: 'myDataEndpoint'
+      exportName: 'apiEndpoint'
     })
   }
 
