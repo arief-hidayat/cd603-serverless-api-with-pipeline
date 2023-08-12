@@ -1,6 +1,7 @@
 import * as cdk from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import * as cicd from 'aws-cdk-lib/pipelines';
+import * as ssm from 'aws-cdk-lib/aws-ssm';
 import {ServerlessApiStack} from "./serverless-api-stack";
 import {pipelines} from "aws-cdk-lib";
 
@@ -16,7 +17,7 @@ interface GitSource {
   // CONN_ARN=$(aws codestar-connections create-connection --provider-type GitHub --connection-name arief-hidayat-github --output json | jq -r .ConnectionArn)
   // aws ssm put-parameter --name git-repo-connection-arn --value $CONN_ARN --type String
   // update pending connection (must be from AWS console)
-  connectionArn: string
+  connectionArnSsmParam: string
 }
 
 class TargetApplication extends cdk.Stage {
@@ -35,9 +36,7 @@ export class PipelineStack extends cdk.Stack {
     super(scope, id, props);
     const serverlessApiPipeline = new cicd.CodePipeline(this, 'serverless-api-cicd', {
       synth: new cicd.ShellStep('synth', {
-        input: cicd.CodePipelineSource.connection(props.git.repo, props.git.branch, {
-          connectionArn: props.git.connectionArn
-        }),
+        input: this.createCodepipelineSrcConnection(props.git),
         commands: [
             "npm install -g aws-cdk",
             "cdk synth",
@@ -64,5 +63,11 @@ export class PipelineStack extends cdk.Stack {
         pre: [new pipelines.ManualApprovalStep("DeployToProduction")]
       })
     }
+  }
+  createCodepipelineSrcConnection(git: GitSource): cdk.pipelines.CodePipelineSource {
+    const gitConnectionArn = ssm.StringParameter.fromStringParameterName(this, 'git-conn-arn', git.connectionArnSsmParam)
+    return cicd.CodePipelineSource.connection(git.repo, git.branch, {
+      connectionArn: gitConnectionArn.stringValue
+    })
   }
 }
