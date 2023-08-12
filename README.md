@@ -8,4 +8,4 @@ This demo project borrows code from [demo-cdk](https://github.com/donnieprakoso/
 * `cdk diff $STACK`        compare deployed stack with current state
 * `cdk synth $STACK`       emits the synthesized CloudFormation template
 
-where `STACK` can be `api-dev`, `pipeline`, or `--all`
+where `STACK` can be `cd63-api-dev`, `cd63-pipeline`, or `--all`

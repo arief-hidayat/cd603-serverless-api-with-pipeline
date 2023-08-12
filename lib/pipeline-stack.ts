@@ -49,7 +49,7 @@ export class PipelineStack extends cdk.Stack {
     const stagingApp = new TargetApplication(this, "staging", {env: props.stagingEnv})
     serverlessApiPipeline.addStage(stagingApp, {
       post: [
-          new cdk.pipelines.ShellStep("Integration Test", {
+          new cdk.pipelines.ShellStep("smoke test", {
             envFromCfnOutputs: {
               ENDPOINT_URL: stagingApp.outputApiEndpoint
             },
