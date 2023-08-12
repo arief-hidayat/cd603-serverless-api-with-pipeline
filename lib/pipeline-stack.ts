@@ -55,7 +55,7 @@ export class PipelineStack extends cdk.Stack {
               ENDPOINT_URL: stagingApp.outputApiEndpoint
             },
             installCommands: ["apt install -y jq"],
-            commands: ["curl $ENDPOINT_URL | jq .data"]
+            commands: ["curl $ENDPOINT_URL/abc | jq .data"]
           })
       ]
     })
