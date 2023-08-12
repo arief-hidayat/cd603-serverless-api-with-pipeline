@@ -4,19 +4,20 @@ import { ServerlessApiStack } from '../lib/serverless-api-stack';
 import {PipelineStack} from "../lib/pipeline-stack";
 
 const app = new cdk.App();
+const env: cdk.Environment = { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION }
 new ServerlessApiStack(app, 'api-dev', {
-  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+  env: env,
   restResourceName: 'data',
   stageName: 'dev',
 });
 
 new PipelineStack(app, 'pipeline', {
-  env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'ap-southeast-1' },
+  env: env,
   git: {
     repo: 'arief-hidayat/cd603-serverless-api-with-pipeline',
     branch: 'main',
     connectionArnSsmParam: 'git-repo-connection-arn'
   },
-  stagingEnv: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'ap-southeast-3' },
-  // prodEnv: { account: process.env.CDK_DEFAULT_ACCOUNT, region: 'ap-southeast-3' },
+  stagingEnv: env,
+  // prodEnv: env,
 })

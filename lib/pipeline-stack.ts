@@ -15,8 +15,8 @@ interface GitSource {
   repo: string,
   branch: string,
   // CONN_ARN=$(aws codestar-connections create-connection --provider-type GitHub --connection-name arief-hidayat-github --output json | jq -r .ConnectionArn)
-  // aws ssm put-parameter --name git-repo-connection-arn --value $CONN_ARN --type String
   // update pending connection (must be from AWS console)
+  // aws ssm put-parameter --name git-repo-connection-arn --value $CONN_ARN --type String
   connectionArnSsmParam: string
 }
 
