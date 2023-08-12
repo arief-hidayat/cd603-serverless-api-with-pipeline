@@ -17,6 +17,7 @@ export class ServerlessApiStack extends cdk.Stack {
 
     // create DynamoDB Table
     const ddbTable = new dynamodb.Table(this, props.restResourceName, {
+      tableName: `${props.stageName}-${props.restResourceName}`,
       partitionKey: { name: 'ID', type: dynamodb.AttributeType.STRING },
       // THIS IS NOT RECOMMENDED FOR PRODUCTION USE
       removalPolicy: cdk.RemovalPolicy.DESTROY, 
@@ -77,13 +78,9 @@ export class ServerlessApiStack extends cdk.Stack {
     restDataId.addMethod('DELETE', deleteDataFn)
 
     // CDK Outputs
-    new cdk.CfnOutput(this, 'dynamodbTable', {
-      value: ddbTable.tableName,
-      exportName: 'ddbTable'
-    })
     this.outputApiEndpoint = new cdk.CfnOutput(this, 'apiEndpoint', {
       value: `${api.url}${props.restResourceName}`,
-      exportName: 'apiEndpoint'
+      exportName: `${props.stageName}-apiEndpoint`
     })
   }
 
