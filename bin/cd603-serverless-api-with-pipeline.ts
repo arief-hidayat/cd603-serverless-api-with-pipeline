@@ -19,5 +19,5 @@ new PipelineStack(app, 'cd63-pipeline', {
     connectionArnSsmParam: 'git-repo-connection-arn'
   },
   stagingEnv: env,
-  // prodEnv: env,
+  prodEnv: env,
 })
