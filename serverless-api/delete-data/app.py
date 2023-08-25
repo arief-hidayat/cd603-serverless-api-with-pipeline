@@ -29,5 +29,5 @@ def handler(event, context):
     id = event['pathParameters']['id'] if 'id' in event['pathParameters'] else None
     if id:
         delete_from_db(id)
-        response =  {"statusCode": 200, "body": json.dumps({"message": "success"})}
+        response =  {"statusCode": 204}
     return response
