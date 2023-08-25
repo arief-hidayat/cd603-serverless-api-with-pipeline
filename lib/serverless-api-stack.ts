@@ -25,24 +25,38 @@ export class ServerlessApiStack extends cdk.Stack {
       writeCapacity: 1
     });
 
-    // define IAM role for lambda function
-    const lambdaRole = this.createLambdaRoleForLoggingAndDbAccess(ddbTable.tableArn)
+    const ddbReadWriteActions = [
+      'dynamodb:PutItem',
+      'dynamodb:GetItem',
+      'dynamodb:UpdateItem',
+      'dynamodb:DeleteItem',
+      'dynamodb:Scan',
+      'dynamodb:Query',
+      'dynamodb:ConditionCheckItem',
+    ]
+
     // create API Gateway Lambda integrations
-    const deleteDataFn = this.createServerlessApi('delete-data', lambdaRole, ddbTable.tableName)
-    const getDataFn = this.createServerlessApi('get-data', lambdaRole, ddbTable.tableName)
-    const listDataFn = this.createServerlessApi('list-data', lambdaRole, ddbTable.tableName)
-    const saveDataFn = this.createServerlessApi('save-data', lambdaRole, ddbTable.tableName)
+    const deleteDataFn = this.createServerlessApi(
+        'delete-data', ddbTable, ddbReadWriteActions)
+    const getDataFn = this.createServerlessApi(
+        'get-data', ddbTable, ['dynamodb:GetItem'])
+    const listDataFn = this.createServerlessApi(
+        'list-data', ddbTable, ['dynamodb:Scan'])
+    const saveDataFn = this.createServerlessApi(
+        'save-data', ddbTable, ddbReadWriteActions)
 
     // create REST APIs
     const api = new apigateway.RestApi(this, 'api', {
-      endpointConfiguration: { types: [apigateway.EndpointType.EDGE] },
+      endpointConfiguration: { types: [apigateway.EndpointType.REGIONAL] },
       deployOptions: {
         stageName: props.stageName,
       }
     })
+    // https://api.com/
     const restData = api.root.addResource(props.restResourceName)
     restData.addMethod('POST', saveDataFn)
     restData.addMethod('GET', listDataFn)
+    // https://api.com/123
     const restDataId = restData.addResource('{id}')
     restDataId.addMethod('GET', getDataFn)
     restDataId.addMethod('DELETE', deleteDataFn)
@@ -54,9 +68,25 @@ export class ServerlessApiStack extends cdk.Stack {
     })
   }
 
+  // create API Gateway Lambda Integration
+  // the python function code should reside in 'serverless-api/${name}/app.py'
+  createServerlessApi(name: string, ddbTable: dynamodb.Table, ddbAllowedActions: string[]): apigateway.LambdaIntegration {
+    const lambdaRole = this.createLambdaRoleForLoggingAndDbAccess(name + '-lambda-role', ddbTable.tableArn, ddbAllowedActions)
+    const fn = new lambda.Function(this, name, {
+      runtime: lambda.Runtime.PYTHON_3_11,
+      code: new lambda.AssetCode(`serverless-api/${name}`),
+      handler: 'app.handler',
+      timeout: cdk.Duration.seconds(60),
+      tracing: lambda.Tracing.ACTIVE,
+      role: lambdaRole
+    })
+    fn.addEnvironment('TABLE_NAME', ddbTable.tableName)
+    return new apigateway.LambdaIntegration(fn)
+  }
+
   // define IAM role for lambda function
-  createLambdaRoleForLoggingAndDbAccess(ddbTableArn: string): iam.Role {
-    const lambdaRole = new iam.Role(this, 'lambda-role', {
+  createLambdaRoleForLoggingAndDbAccess(id: string, ddbTableArn: string, ddbAllowedActions: string[]): iam.Role {
+    const lambdaRole = new iam.Role(this, id, {
       assumedBy: new iam.ServicePrincipal('lambda.amazonaws.com'),
     })
     // allow the following CloudWatch logs action
@@ -75,33 +105,20 @@ export class ServerlessApiStack extends cdk.Stack {
     const dynamoDbPolicy = new iam.PolicyStatement({
       effect: iam.Effect.ALLOW,
       resources: [ddbTableArn],
-      actions: [
-        'dynamodb:PutItem',
-        'dynamodb:GetItem',
-        'dynamodb:UpdateItem',
-        'dynamodb:DeleteItem',
-        'dynamodb:Scan',
-        'dynamodb:Query',
-        'dynamodb:ConditionCheckItem',
-      ]
+      actions: ddbAllowedActions,
+      // actions: [
+      //   'dynamodb:PutItem',
+      //   'dynamodb:GetItem',
+      //   'dynamodb:UpdateItem',
+      //   'dynamodb:DeleteItem',
+      //   'dynamodb:Scan',
+      //   'dynamodb:Query',
+      //   'dynamodb:ConditionCheckItem',
+      // ]
     })
     lambdaRole.addToPolicy(dynamoDbPolicy)
     return lambdaRole
   }
 
-  // create API Gateway Lambda Integration
-  // the python function code should reside in 'serverless-api/${name}/app.py'
-  createServerlessApi(name: string, lambdaRole: iam.Role, ddbTableName: string): apigateway.LambdaIntegration {
-    const fn = new lambda.Function(this, name, {
-      runtime: lambda.Runtime.PYTHON_3_11,
-      code: new lambda.AssetCode(`serverless-api/${name}`),
-      handler: 'app.handler',
-      timeout: cdk.Duration.seconds(60),
-      tracing: lambda.Tracing.ACTIVE,
-      role: lambdaRole
-    })
-    fn.addEnvironment('TABLE_NAME', ddbTableName)
-    return new apigateway.LambdaIntegration(fn)
-  }
 
 }

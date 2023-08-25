@@ -31,5 +31,5 @@ def handler(event, context):
     data = json.loads(event['body'])
     data['ID'] = str(uuid.uuid4()) if "ID" not in data else data['ID']
     save_to_db(data)
-    response =  {"statusCode": 200, "body": json.dumps({"message": "success"})}
+    response =  {"statusCode": 201, "body": json.dumps({"message": "success"})}
     return response
