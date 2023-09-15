@@ -106,15 +106,6 @@ export class ServerlessApiStack extends cdk.Stack {
       effect: iam.Effect.ALLOW,
       resources: [ddbTableArn],
       actions: ddbAllowedActions,
-      // actions: [
-      //   'dynamodb:PutItem',
-      //   'dynamodb:GetItem',
-      //   'dynamodb:UpdateItem',
-      //   'dynamodb:DeleteItem',
-      //   'dynamodb:Scan',
-      //   'dynamodb:Query',
-      //   'dynamodb:ConditionCheckItem',
-      // ]
     })
     lambdaRole.addToPolicy(dynamoDbPolicy)
     return lambdaRole
