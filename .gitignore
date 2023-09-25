@@ -14,3 +14,5 @@ package-lock.json
 cdk-output.json
 .idea/
 *.iml
+
+demo-prep.md
